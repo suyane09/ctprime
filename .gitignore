@@ -2,4 +2,5 @@ node_modules/
 .env
 *.log
 ctprime.db-shm
-ctprime.db-wal
+ctprime.db-walnode_modules/
+.env
