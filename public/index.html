@@ -634,9 +634,12 @@ async function api(metodo, caminho, corpo) {
 
   if (!resposta.ok) {
     if (resposta.status === 401) {
+      const tinhaSessao = !!token; // só recarrega se havia token (sessão realmente expirou)
       limparToken();
-      mostrarToast((dados && dados.erro) || "Sessão expirada. Faça login novamente.");
-      setTimeout(() => location.reload(), 1200);
+      if (tinhaSessao) {
+        mostrarToast((dados && dados.erro) || "Sessão expirada. Faça login novamente.");
+        setTimeout(() => location.reload(), 1200);
+      }
     }
     throw new Error((dados && dados.erro) || "Erro ao comunicar com o servidor.");
   }
@@ -1744,6 +1747,7 @@ const PAGINAS = {
 let paginaAtivaId = "painel";
 
 async function atualizarBadgePendentes() {
+  if (!Auth.obterUsuarioLogado()) return; // evita chamadas à API antes do login (causava loop de reload)
   const badge = document.getElementById("badge-pendentes");
   if (!badge) return;
   const pedidos = await store.pedidos.listar();
@@ -1753,6 +1757,7 @@ async function atualizarBadgePendentes() {
 }
 
 async function atualizarBadgeEstoqueBaixo() {
+  if (!Auth.obterUsuarioLogado()) return; // evita chamadas à API antes do login
   const badge = document.getElementById("badge-estoque-baixo");
   if (!badge) return;
   const itensEstoque = await store.estoque.listar();
