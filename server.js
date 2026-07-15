@@ -1,5 +1,6 @@
 require("dotenv").config();
 const path = require("path");
+const os = require("os");
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
@@ -24,7 +25,10 @@ app.use("/api/usuarios", require("./routes/usuarios"));
 app.use("/api/relatorios", require("./routes/relatorios"));
 app.use("/api/configuracoes", require("./routes/configuracoes"));
 registrarRotaUpload(app, autenticar); // troque "autenticar" pelo nome que você achou no Passo 4
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Mesma lógica do DATA_DIR: em produção (Render), aponte UPLOADS_DIR pro
+// Persistent Disk. Sem a variável, usa a pasta "uploads" local de sempre.
+const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(__dirname, "uploads");
+app.use("/uploads", express.static(UPLOADS_DIR));
 app.get("/api/health", (req, res) => res.json({ status: "ok", horario: new Date().toISOString() }));
 
 // -------- Frontend estático (index.html do painel + cardapio.html) --------
@@ -43,9 +47,40 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => console.log("🔌 Cliente desconectado:", socket.id));
 });
 
+function listarIPsDaRedeLocal() {
+  const interfaces = os.networkInterfaces();
+  const ips = [];
+  for (const nome of Object.keys(interfaces)) {
+    for (const info of interfaces[nome] || []) {
+      if (info.family === "IPv4" && !info.internal) ips.push(info.address);
+    }
+  }
+  return ips;
+}
+
 const PORTA = process.env.PORT || 3000;
+const RODANDO_NO_RENDER = !!process.env.RENDER;
+// O listen() abaixo não restringe host, então localmente o servidor já aceita
+// conexões de qualquer dispositivo na mesma rede Wi-Fi — não só do próprio PC.
 servidorHttp.listen(PORTA, () => {
-  console.log(`✅ CT Prime API rodando em http://localhost:${PORTA}`);
+  console.log(`✅ CT Prime API rodando na porta ${PORTA}`);
+  if (RODANDO_NO_RENDER) {
+    console.log("   Rodando no Render — acesse pela URL pública do seu serviço (ex: https://seu-app.onrender.com).");
+    return;
+  }
   console.log(`   Painel administrativo: http://localhost:${PORTA}/index.html`);
   console.log(`   Cardápio do cliente:   http://localhost:${PORTA}/cardapio.html`);
+
+  const ipsLocais = listarIPsDaRedeLocal();
+  if (ipsLocais.length) {
+    console.log("");
+    console.log("📶 Acesso de outros dispositivos na mesma rede Wi-Fi:");
+    ipsLocais.forEach((ip) => {
+      console.log(`   Cardápio do cliente:   http://${ip}:${PORTA}/cardapio.html`);
+      console.log(`   Painel administrativo: http://${ip}:${PORTA}/index.html`);
+    });
+    console.log("   (Certifique-se de que o firewall do PC libera a porta " + PORTA + " na rede local.)");
+  } else {
+    console.log("⚠️  Não encontrei um IP de rede local — verifique se o Wi-Fi/rede está conectado.");
+  }
 });

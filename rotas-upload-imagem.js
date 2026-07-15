@@ -34,7 +34,11 @@ const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 
-const PASTA_UPLOADS = path.join(__dirname, "uploads");
+// Mesma variável de ambiente usada no server.js — em produção (Render),
+// defina UPLOADS_DIR apontando pro Persistent Disk (ex: /var/data/uploads),
+// senão as imagens somem a cada novo deploy. Sem a variável, continua
+// salvando na pasta "uploads" local de sempre.
+const PASTA_UPLOADS = process.env.UPLOADS_DIR || path.join(__dirname, "uploads");
 if (!fs.existsSync(PASTA_UPLOADS)) fs.mkdirSync(PASTA_UPLOADS, { recursive: true });
 
 const TIPOS_ACEITOS = {

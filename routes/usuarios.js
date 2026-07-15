@@ -19,8 +19,8 @@ router.get("/", (req, res) => {
 
 router.post("/", (req, res) => {
   const { nome, email, papel, ativo } = req.body || {};
-  if (!nome || !email || !["admin", "gerente", "cozinha"].includes(papel)) {
-    return res.status(400).json({ erro: "Informe nome, e-mail e um papel válido (admin, gerente ou cozinha)." });
+  if (!nome || !email || !["admin", "gerente", "atendente", "cozinha"].includes(papel)) {
+    return res.status(400).json({ erro: "Informe nome, e-mail e um papel válido (admin, gerente, atendente ou cozinha)." });
   }
   const emailNormalizado = email.trim().toLowerCase();
   const existente = db.prepare("SELECT id FROM usuarios WHERE email = ?").get(emailNormalizado);

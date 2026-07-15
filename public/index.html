@@ -778,6 +778,15 @@ const Auth = {
 // ============================================================
 // TEMPO REAL — Socket.IO (substitui o evento "storage" entre abas)
 // ============================================================
+// Service Worker: cacheia os arquivos estáticos do painel (CSS/JS/ícones)
+// pra abrir mais rápido na rede local. Dados do painel continuam sempre
+// vindos ao vivo do servidor — isso aqui não cacheia nada da API do admin.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((erro) => console.warn("Falha ao registrar Service Worker:", erro));
+  });
+}
+
 const socket = io({
   reconnection: true,
   reconnectionAttempts: Infinity,

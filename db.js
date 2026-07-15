@@ -4,7 +4,11 @@ const Database = require("better-sqlite3");
 const bcrypt = require("bcryptjs");
 const { randomUUID } = require("crypto");
 
-const DATA_DIR = path.join(__dirname, "data");
+// Em produção (Render), defina a variável de ambiente DATA_DIR apontando
+// pro caminho do seu Persistent Disk (ex: /var/data) — assim o banco
+// sobrevive a novos deploys. Sem essa variável, continua usando a pasta
+// "data" local, igual antes (bom pra rodar no seu PC).
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const db = new Database(path.join(DATA_DIR, "ctprime.db"));
@@ -17,7 +21,7 @@ db.exec(`
     nome TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     senha_hash TEXT NOT NULL,
-    papel TEXT NOT NULL CHECK (papel IN ('admin','gerente','cozinha')),
+    papel TEXT NOT NULL CHECK (papel IN ('admin','gerente','atendente','cozinha')),
     ativo INTEGER NOT NULL DEFAULT 1,
     criadoEm TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -76,6 +80,35 @@ db.exec(`
     email TEXT DEFAULT ''
   );
 `);
+
+// Migração — bancos criados antes do papel "atendente" existir têm a coluna
+// "papel" travada por um CHECK que só aceita admin/gerente/cozinha. SQLite não
+// permite alterar um CHECK existente com ALTER TABLE, então recriamos a tabela
+// com a restrição atualizada e copiamos todos os usuários já cadastrados.
+const definicaoUsuarios = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='usuarios'").get();
+if (definicaoUsuarios && !definicaoUsuarios.sql.includes("atendente")) {
+  const migrarPapelAtendente = db.transaction(() => {
+    db.exec(`
+      CREATE TABLE usuarios_novo (
+        id TEXT PRIMARY KEY,
+        nome TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        senha_hash TEXT NOT NULL,
+        papel TEXT NOT NULL CHECK (papel IN ('admin','gerente','atendente','cozinha')),
+        ativo INTEGER NOT NULL DEFAULT 1,
+        criadoEm TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+    `);
+    db.exec(`
+      INSERT INTO usuarios_novo (id, nome, email, senha_hash, papel, ativo, criadoEm)
+      SELECT id, nome, email, senha_hash, papel, ativo, criadoEm FROM usuarios;
+    `);
+    db.exec("DROP TABLE usuarios;");
+    db.exec("ALTER TABLE usuarios_novo RENAME TO usuarios;");
+  });
+  migrarPapelAtendente();
+  console.log("✔ Papel 'atendente' liberado na tabela usuarios (usuários existentes preservados)");
+}
 
 // Migração — bancos criados antes da coluna "telefone" existir não a recebem
 // automaticamente pelo CREATE TABLE IF NOT EXISTS acima, então verificamos e
