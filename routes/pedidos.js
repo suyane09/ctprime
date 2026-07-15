@@ -1,9 +1,31 @@
 const express = require("express");
 const { randomUUID } = require("crypto");
+const rateLimit = require("express-rate-limit");
 const db = require("../db");
 const { autenticar, permitirPapeis } = require("../middleware/auth");
 
 const router = express.Router();
+
+// Limita criação de pedidos por IP — evita flood na fila da cozinha.
+// Generoso o bastante pra não travar clientes legítimos numa mesma rede/wifi.
+const limitadorCriarPedido = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { erro: "Muitos pedidos enviados em pouco tempo. Aguarde alguns minutos." },
+});
+
+// Limita consulta pública por telefone — telefone não é segredo, então sem
+// isso qualquer pessoa poderia varrer números e ler o histórico de pedidos
+// (nome, itens, total, forma de pagamento) de outras pessoas.
+const limitadorConsultaTelefone = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { erro: "Muitas consultas em pouco tempo. Aguarde alguns minutos e tente novamente." },
+});
 
 function paraSaida(p) {
   return { ...p, itens: JSON.parse(p.itens) };
@@ -20,7 +42,7 @@ function normalizarTelefone(telefone) {
 }
 
 // Pública — o cardápio do cliente cria pedidos sem precisar de login
-router.post("/", (req, res) => {
+router.post("/", limitadorCriarPedido, (req, res) => {
   const { cliente, telefone, itens, formaPagamento, trocoPara } = req.body || {};
   // Observação: "total", "precoUnit" e "produtoNome" enviados pelo cliente
   // são IGNORADOS de propósito — nunca confie em preço/total vindo do front-end.
@@ -102,7 +124,7 @@ router.get("/", autenticar, (req, res) => {
 // usado na hora de pedir. Funciona em qualquer aparelho (não depende do navegador
 // onde o pedido foi feito). Como não existe cadastro/senha, isso não é dado sigiloso
 // de acesso — é só uma forma de o cliente reencontrar os próprios pedidos.
-router.get("/por-telefone/:telefone", (req, res) => {
+router.get("/por-telefone/:telefone", limitadorConsultaTelefone, (req, res) => {
   const telefoneNormalizado = normalizarTelefone(req.params.telefone);
   if (telefoneNormalizado.length < 10 || telefoneNormalizado.length > 11) {
     return res.status(400).json({ erro: "Informe um telefone válido com DDD." });

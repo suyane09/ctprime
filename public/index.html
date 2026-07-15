@@ -8,6 +8,7 @@
 <link href="/assets/fonts/fonts.css" rel="stylesheet">
 <script src="/assets/vendor/chart.umd.js" defer></script>
 <script src="/socket.io/socket.io.js"></script>
+<script src="/assets/shared.js"></script>
 <style>
 * { box-sizing: border-box; }
 
@@ -75,7 +76,6 @@ body:has(.conn-banner.visivel) .app { padding-top: 38px; }
 .login-card .form-field label { color: #9ca3af; }
 .login-card .form-field input { background: #141414; border-color: rgba(255,255,255,0.1); color: #fff; }
 .login-card .form-field input:focus { border-color: var(--accent); outline: none; }
-.login-card .hint { font-size: 11px; color: #6b7280; margin-top: 20px; text-align: center; line-height: 1.5; }
 
 /* ===================== SIDEBAR ===================== */
 .sidebar {
@@ -349,10 +349,6 @@ tbody tr:hover td { background: #fafaf8; }
         </div>
         <button class="btn-primary" id="btn-entrar" style="width: 100%;">Entrar no Sistema</button>
       </div>
-      <div class="hint">
-        <strong>Acessos padrão para testes (Senha: 123456):</strong><br>
-        admin@ctprime.com (Admin) | func@ctprime.com (Funcionário) | cozinha@ctprime.com (Cozinha)
-      </div>
     </div>
   </div>
 
@@ -468,19 +464,9 @@ function confirmarAcao(titulo, mensagem, textoBotao = "Excluir") {
 }
 
 // ============================================================
-// UTILITÁRIOS
+// UTILITÁRIOS (específicos desta página — escapeHtml e formatBRL
+// agora vivem em /assets/shared.js, compartilhado com o cardápio)
 // ============================================================
-function escapeHtml(valor) {
-  return String(valor ?? "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[c]));
-}
-
-const formatBRL = (valor) => Number(valor ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 // O servidor grava o horário do pedido em UTC, mas manda o texto sem o "Z" no final.
 // Sem o "Z", o navegador acha que aquele horário JÁ é o horário local e não faz
 // nenhuma conversão — por isso o pedido chegava com 3 horas a mais (Brasília = UTC-3).
@@ -610,8 +596,6 @@ function mostrarNotificacaoPedido(pedido) {
 }
 
 
-const API_BASE = ""; // mesma origem do servidor Express
-
 function obterToken() {
   return sessionStorage.getItem("ctprime_token");
 }
@@ -722,12 +706,7 @@ const store = {
     listar: () => api("GET", "/api/produtos"),
     adicionar: (produto) => api("POST", "/api/produtos", produto),
     atualizar: (id, produto) => api("PATCH", `/api/produtos/${id}`, produto),
-    alternarAtivo: async (id) => {
-      const lista = await store.produtos.listar();
-      const alvo = lista.find((p) => p.id === id);
-      if (!alvo) return;
-      return api("PATCH", `/api/produtos/${id}`, { ativo: !alvo.ativo });
-    },
+    alternarAtivo: (id, ativoAtual) => api("PATCH", `/api/produtos/${id}`, { ativo: !ativoAtual }),
     remover: (id) => api("DELETE", `/api/produtos/${id}`),
   },
   estoque: {
@@ -738,12 +717,7 @@ const store = {
   usuarios: {
     listar: () => api("GET", "/api/usuarios"),
     adicionar: (usuario) => api("POST", "/api/usuarios", usuario),
-    alternarAtivo: async (id) => {
-      const lista = await store.usuarios.listar();
-      const alvo = lista.find((u) => u.id === id);
-      if (!alvo) return;
-      return api("PATCH", `/api/usuarios/${id}`, { ativo: !alvo.ativo });
-    },
+    alternarAtivo: (id, ativoAtual) => api("PATCH", `/api/usuarios/${id}`, { ativo: !ativoAtual }),
     remover: (id) => api("DELETE", `/api/usuarios/${id}`),
   },
   relatorios: {
@@ -1206,7 +1180,7 @@ function renderPedidos(container) {
               <td>${formatDataHora(p.criadoEm)}</td>
               <td>${acoesPorStatus(p)}</td>
               <td><button class="btn-secondary" data-imprimir="${p.id}" title="Imprimir comanda" aria-label="Imprimir comanda"><i data-icon="printer" class="icon-sm"></i></button></td>
-              ${eCozinha ? '' : `<td><button class="btn-danger-outline" data-remover="${p.id}" title="Excluir"><i data-icon="trash" class="icon-sm"></i></button></td>`}
+              ${eCozinha ? '' : `<td><button class="btn-danger-outline" data-remover="${p.id}" title="Excluir" aria-label="Excluir pedido"><i data-icon="trash" class="icon-sm"></i></button></td>`}
             </tr>`).join("")}
         </tbody>
       </table></div>
@@ -1298,7 +1272,9 @@ function renderProdutos(container) {
     `;
     renderIcons(wrap);
     wrap.querySelectorAll("[data-toggle]").forEach((el) => el.addEventListener("click", async () => {
-      try { await store.produtos.alternarAtivo(el.dataset.toggle); } catch (erro) { mostrarToast(erro.message); }
+      const alvo = lista.find((p) => p.id === el.dataset.toggle);
+      if (!alvo) return;
+      try { await store.produtos.alternarAtivo(alvo.id, alvo.ativo); } catch (erro) { mostrarToast(erro.message); }
       desenhar();
     }));
     wrap.querySelectorAll("[data-editar]").forEach((btn) => btn.addEventListener("click", () => {
@@ -1889,7 +1865,9 @@ function renderUsuarios(container) {
     `;
     renderIcons(wrap);
     wrap.querySelectorAll("[data-toggle]").forEach((el) => el.addEventListener("click", async () => {
-      try { await store.usuarios.alternarAtivo(el.dataset.toggle); } catch (erro) { mostrarToast(erro.message); }
+      const alvo = lista.find((u) => u.id === el.dataset.toggle);
+      if (!alvo) return;
+      try { await store.usuarios.alternarAtivo(alvo.id, alvo.ativo); } catch (erro) { mostrarToast(erro.message); }
       desenhar();
     }));
     wrap.querySelectorAll("[data-remover]").forEach((btn) => btn.addEventListener("click", async () => {

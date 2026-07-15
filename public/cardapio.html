@@ -25,6 +25,7 @@
 
 <link href="/assets/fonts/fonts.css" rel="stylesheet">
 <script src="/socket.io/socket.io.js"></script>
+<script src="/assets/shared.js"></script>
 <style>
 * { box-sizing: border-box; }
 
@@ -3424,7 +3425,6 @@ var qrcode = function() {
 // Socket.IO — sem precisar recarregar a página.
 // ============================================================
 
-const API_BASE = "";
 const socket = io();
 
 async function apiGet(caminho) {
@@ -3434,17 +3434,7 @@ async function apiGet(caminho) {
 }
 
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : "id-" + Date.now() + "-" + Math.random().toString(16).slice(2));
-const formatBRL = (v) => Number(v ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-function escapeHtml(valor) {
-  return String(valor ?? "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[c]));
-}
+// escapeHtml e formatBRL agora vivem em /assets/shared.js (compartilhado com o painel admin)
 
 const DEFINICOES_BADGES = {
   novo: "Novo",
@@ -4900,10 +4890,15 @@ document.getElementById("overlay-produto").addEventListener("click", (e) => {
   if (e.target.id === "overlay-produto") fecharDetalheProduto();
 });
 
+let _timeoutBusca = null;
 document.getElementById("campo-busca-input").addEventListener("input", (e) => {
-  termoBusca = e.target.value;
-  mostrarTodosItens = false;
-  renderCardapio();
+  const valor = e.target.value;
+  clearTimeout(_timeoutBusca);
+  _timeoutBusca = setTimeout(() => {
+    termoBusca = valor;
+    mostrarTodosItens = false;
+    renderCardapio();
+  }, 220);
 });
 document.getElementById("select-ordenar").addEventListener("change", (e) => {
   ordenacaoAtiva = e.target.value;
