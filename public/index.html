@@ -143,6 +143,55 @@ tr.linha-estoque-baixo { background: #fef2f2; }
 .metric-label { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-muted); }
 .metric-value { margin: 2px 0 0; font-size: 19px; font-weight: 800; letter-spacing: -0.2px; }
 
+/* ===================== CAIXA (fechamento de turno) ===================== */
+.caixa-painel { padding: 0; overflow: hidden; }
+.caixa-status-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+}
+.caixa-status-esquerda { display: flex; align-items: center; gap: 12px; }
+.caixa-status-pill {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+  padding: 5px 10px; border-radius: 999px; text-transform: uppercase; flex-shrink: 0;
+}
+.caixa-status-pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.caixa-status-pill.aberto { background: #dcfce7; color: #15803d; }
+.caixa-status-pill.fechado { background: #f1f1ec; color: #6b6b63; }
+.caixa-status-texto strong { display: block; font-size: 14px; color: var(--text-main); }
+.caixa-status-texto span { font-size: 12.5px; color: var(--text-muted); }
+.caixa-abrir-form { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.caixa-abrir-form .form-field { margin: 0; max-width: 150px; }
+
+.caixa-stats-strip { display: flex; flex-wrap: wrap; }
+.caixa-stat {
+  flex: 1; min-width: 130px; padding: 16px 22px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.caixa-stat:last-child { border-right: none; }
+.caixa-stat-label { margin: 0; font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); text-transform: uppercase; }
+.caixa-stat-valor { margin: 4px 0 0; font-size: 18px; font-weight: 800; }
+.caixa-stat.destaque .caixa-stat-valor { color: var(--accent-dark); }
+
+.caixa-secao { padding: 20px 22px; border-bottom: 1px solid var(--border); }
+.caixa-secao:last-child { border-bottom: none; }
+.caixa-secao-titulo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.caixa-secao-titulo h3 { margin: 0; font-size: 13.5px; font-weight: 700; }
+.caixa-secao-sub { margin: 2px 0 0; font-size: 12.5px; color: var(--text-muted); }
+
+.caixa-fechar-form { padding: 16px 22px 20px; border-top: 1px dashed var(--border); }
+
+.caixa-historico summary {
+  cursor: pointer; font-size: 13px; font-weight: 700; color: var(--text-main); list-style: none;
+  display: flex; align-items: center; gap: 6px; padding: 16px 22px; user-select: none;
+}
+.caixa-historico summary::-webkit-details-marker { display: none; }
+.caixa-historico summary::before { content: "▸"; font-size: 11px; color: var(--text-muted); transition: transform 0.15s; }
+.caixa-historico[open] summary::before { transform: rotate(90deg); }
+.caixa-historico summary .contagem { font-weight: 500; color: var(--text-muted); }
+.caixa-historico-corpo { padding: 0 22px 20px; }
+td.dif-positiva { color: #16a34a; font-weight: 700; }
+td.dif-negativa { color: #dc2626; font-weight: 700; }
+td.dif-neutra { color: var(--text-muted); font-weight: 700; }
+
 /* ===================== PAINÉIS / GRÁFICOS ===================== */
 .panel-row { display: flex; gap: 16px; flex-wrap: wrap; }
 .panel { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; flex: 1; min-width: 320px; box-shadow: var(--shadow-sm); }
@@ -287,6 +336,7 @@ tbody tr:hover td { background: #fafaf8; }
 }
 .toast.show { opacity: 1; transform: translateY(0); }
 
+
 /* ===================== NOTIFICAÇÕES DE NOVO PEDIDO (tempo real) ===================== */
 .notificacoes-wrap {
   position: fixed; top: 20px; right: 20px; z-index: 200;
@@ -359,8 +409,8 @@ tbody tr:hover td { background: #fafaf8; }
         <div><p class="brand-name">CT PRIME</p><p class="brand-sub" id="user-role-badge">ADMINISTRAÇÃO</p></div>
       </div>
       <nav class="menu" id="menu">
-        <button class="menu-item" data-page="painel" data-role="admin,gerente,atendente"><i data-icon="grid"></i> Painel</button>
-        <button class="menu-item" data-page="pedidos" data-role="admin,gerente,atendente,cozinha"><i data-icon="cart"></i> Pedidos <span class="badge-pendentes" id="badge-pendentes"></span></button>
+        <button class="menu-item" data-page="painel" data-role="admin,gerente,atendente"><i data-icon="grid"></i> Painel <span class="badge-pendentes" id="badge-pendentes-painel"></span></button>
+        <button class="menu-item" data-page="pedidos" data-role="admin,gerente,atendente,cozinha"><i data-icon="cart"></i> Pedidos <span class="badge-pendentes" id="badge-pendentes-pedidos"></span></button>
         <button class="menu-item" data-page="produtos" data-role="admin,gerente,atendente"><i data-icon="box"></i> Produtos</button>
         <button class="menu-item" data-page="estoque" data-role="admin,gerente,atendente"><i data-icon="warehouse"></i> Estoque <span class="badge-estoque-baixo" id="badge-estoque-baixo"></span></button>
         <button class="menu-item" data-page="relatorios" data-role="admin"><i data-icon="file"></i> Relatórios</button>
@@ -591,7 +641,6 @@ function mostrarNotificacaoPedido(pedido) {
   });
 
   wrap.appendChild(card);
-  tocarSomNovoPedido();
   setTimeout(remover, 6000);
 }
 
@@ -728,6 +777,12 @@ const store = {
   configuracoes: {
     obter: () => api("GET", "/api/configuracoes"),
     salvar: (dados) => api("PUT", "/api/configuracoes", dados),
+  },
+  fechamentos: {
+    obterAberto: () => api("GET", "/api/fechamentos/aberto"),
+    listar: () => api("GET", "/api/fechamentos"),
+    abrir: (valorAbertura, observacoes) => api("POST", "/api/fechamentos/abrir", { valorAbertura, observacoes }),
+    fechar: (id, dados) => api("POST", `/api/fechamentos/${id}/fechar`, dados),
   },
 };
 
@@ -975,6 +1030,182 @@ function renderFormasPagamentoHTML(pagamentos) {
 }
 
 // ============================================================
+// FECHAMENTO DE CAIXA (turno) — só aparece no Painel do gerente
+// ============================================================
+function tabelaHistoricoCaixaHTML(fechados) {
+  if (!fechados.length) {
+    return emptyState("Nenhum fechamento registrado ainda", "Assim que um turno for fechado, ele aparece aqui.");
+  }
+  return `
+    <div class="table-wrap" style="margin-top:0">
+      <table>
+        <thead>
+          <tr><th>Abertura</th><th>Fechamento</th><th>Aberto por</th><th>Fechado por</th><th>Pix</th><th>Cartão</th><th>Dinheiro</th><th>Total</th><th>Diferença</th></tr>
+        </thead>
+        <tbody>
+          ${fechados.map((f) => {
+            const classeDif = f.diferenca === 0 ? "dif-neutra" : f.diferenca > 0 ? "dif-positiva" : "dif-negativa";
+            return `
+            <tr>
+              <td>${formatDataHora(f.abertoEm)}</td>
+              <td>${formatDataHora(f.fechadoEm)}</td>
+              <td>${escapeHtml(f.gerenteAbriuNome)}</td>
+              <td>${escapeHtml(f.gerenteFechouNome)}</td>
+              <td>${formatBRL(f.totalPix)}</td>
+              <td>${formatBRL(f.totalCartao)}</td>
+              <td>${formatBRL(f.totalDinheiro)}</td>
+              <td><strong>${formatBRL(f.totalGeral)}</strong></td>
+              <td class="${classeDif}">${f.diferenca > 0 ? "+" : ""}${formatBRL(f.diferenca)}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function renderCaixaGerente(container) {
+  container.innerHTML = `<div class="panel caixa-painel" style="margin-bottom:20px"><div id="caixa-corpo">${paginaCarregandoHTML()}</div></div>`;
+  const corpo = document.getElementById("caixa-corpo");
+
+  let caixaAberto = null;
+  let historico = [];
+  try {
+    [caixaAberto, historico] = await Promise.all([store.fechamentos.obterAberto(), store.fechamentos.listar()]);
+  } catch (erro) {
+    corpo.innerHTML = emptyState("Não foi possível carregar o caixa", erro.message || "Tente novamente em instantes.");
+    return;
+  }
+
+  async function recarregar() {
+    [caixaAberto, historico] = await Promise.all([store.fechamentos.obterAberto(), store.fechamentos.listar()]);
+    desenhar();
+  }
+
+  function desenhar() {
+    const r = caixaAberto?.resumoAtual || { totalPix: 0, totalCartao: 0, totalDinheiro: 0, totalGeral: 0, totalPedidos: 0 };
+    const fechados = (historico || []).filter((f) => f.status === "fechado");
+
+    corpo.innerHTML = `
+      <div class="caixa-status-bar">
+        <div class="caixa-status-esquerda">
+          <span class="caixa-status-pill ${caixaAberto ? "aberto" : "fechado"}">${caixaAberto ? "Caixa aberto" : "Caixa fechado"}</span>
+          <div class="caixa-status-texto">
+            ${caixaAberto ? `
+              <strong>${escapeHtml(caixaAberto.gerenteAbriuNome)}</strong>
+              <span>Aberto às ${formatDataHora(caixaAberto.abertoEm)} · Troco inicial ${formatBRL(caixaAberto.valorAbertura)}</span>
+            ` : `
+              <strong>Nenhum turno em andamento</strong>
+              <span>Abra o caixa pra começar a registrar as vendas do turno.</span>
+            `}
+          </div>
+        </div>
+        ${caixaAberto ? `
+          <button class="btn-primary" id="btn-fechar-caixa">Fechar caixa</button>
+        ` : `
+          <div class="caixa-abrir-form">
+            <div class="form-field"><label for="caixa-valor-abertura">Troco inicial</label><input id="caixa-valor-abertura" type="number" min="0" step="0.01" value="0" /></div>
+            <button class="btn-primary" id="btn-abrir-caixa">Abrir caixa</button>
+          </div>
+        `}
+      </div>
+
+      ${caixaAberto ? `
+        <div class="caixa-stats-strip">
+          <div class="caixa-stat"><p class="caixa-stat-label">Troco inicial</p><p class="caixa-stat-valor">${formatBRL(caixaAberto.valorAbertura)}</p></div>
+          <div class="caixa-stat"><p class="caixa-stat-label">Pix</p><p class="caixa-stat-valor">${formatBRL(r.totalPix)}</p></div>
+          <div class="caixa-stat"><p class="caixa-stat-label">Cartão</p><p class="caixa-stat-valor">${formatBRL(r.totalCartao)}</p></div>
+          <div class="caixa-stat"><p class="caixa-stat-label">Dinheiro (vendas)</p><p class="caixa-stat-valor">${formatBRL(r.totalDinheiro)}</p></div>
+          <div class="caixa-stat destaque"><p class="caixa-stat-label">Dinheiro esperado na gaveta</p><p class="caixa-stat-valor">${formatBRL(caixaAberto.valorAbertura + r.totalDinheiro)}</p></div>
+          <div class="caixa-stat destaque"><p class="caixa-stat-label">Total do turno</p><p class="caixa-stat-valor">${formatBRL(r.totalGeral)}</p></div>
+          <div class="caixa-stat"><p class="caixa-stat-label">Pedidos</p><p class="caixa-stat-valor">${r.totalPedidos}</p></div>
+        </div>
+        <div class="caixa-fechar-form" id="caixa-form-fechar" style="display:none">
+          <p style="margin:0 0 10px;font-size:13px;color:var(--text-muted)">Confira o dinheiro na gaveta e informe o valor total contado. O esperado é <strong>${formatBRL(caixaAberto.valorAbertura + r.totalDinheiro)}</strong> (troco inicial + vendas em dinheiro).</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+            <div class="form-field" style="max-width:180px">
+              <label for="caixa-valor-contado">Valor contado (dinheiro)</label>
+              <input id="caixa-valor-contado" type="number" min="0" step="0.01" />
+            </div>
+            <div class="form-field" style="flex:1;min-width:220px">
+              <label for="caixa-obs-fechamento">Observações (opcional)</label>
+              <input id="caixa-obs-fechamento" type="text" maxlength="500" placeholder="Ex: nota rasgada, sangria etc." />
+            </div>
+            <button class="btn-primary" id="btn-confirmar-fechamento">Confirmar fechamento</button>
+            <button class="btn-secondary" id="btn-cancelar-fechamento">Cancelar</button>
+          </div>
+        </div>
+      ` : ""}
+
+      <div class="caixa-secao">
+        <div class="caixa-secao-titulo">
+          <div>
+            <h3>Pedidos${caixaAberto ? " do turno" : ""}</h3>
+            <p class="caixa-secao-sub">Pedidos feitos pelo cliente no cardápio chegam aqui automaticamente.</p>
+          </div>
+          <a href="cardapio.html" target="_blank" class="btn-secondary" style="text-decoration:none">Abrir cardápio ↗</a>
+        </div>
+        <div id="caixa-pedidos-embutido" style="margin-top:14px"></div>
+      </div>
+
+      <details class="caixa-historico">
+        <summary>Histórico de fechamentos <span class="contagem">(${fechados.length})</span></summary>
+        <div class="caixa-historico-corpo">${tabelaHistoricoCaixaHTML(fechados)}</div>
+      </details>
+    `;
+    renderIcons(corpo);
+    renderPedidos(document.getElementById("caixa-pedidos-embutido"), { ocultarFiltroData: true, ocultarCabecalho: true, desde: caixaAberto ? caixaAberto.abertoEm : null });
+
+    if (!caixaAberto) {
+      document.getElementById("btn-abrir-caixa").addEventListener("click", async () => {
+        const btn = document.getElementById("btn-abrir-caixa");
+        const valor = Number(document.getElementById("caixa-valor-abertura").value);
+        if (isNaN(valor) || valor < 0) { mostrarToast("Informe um valor de abertura válido."); return; }
+        btn.disabled = true;
+        try {
+          await store.fechamentos.abrir(valor);
+          mostrarToast("Caixa aberto.");
+          await recarregar();
+        } catch (erro) {
+          mostrarToast(erro.message);
+          btn.disabled = false;
+        }
+      });
+      return;
+    }
+
+    document.getElementById("btn-fechar-caixa").addEventListener("click", () => {
+      document.getElementById("caixa-form-fechar").style.display = "block";
+      document.getElementById("btn-fechar-caixa").style.display = "none";
+      document.getElementById("caixa-valor-contado").focus();
+    });
+    document.getElementById("btn-cancelar-fechamento").addEventListener("click", () => {
+      document.getElementById("caixa-form-fechar").style.display = "none";
+      document.getElementById("btn-fechar-caixa").style.display = "inline-flex";
+    });
+    document.getElementById("btn-confirmar-fechamento").addEventListener("click", async () => {
+      const valorContado = Number(document.getElementById("caixa-valor-contado").value);
+      if (isNaN(valorContado) || valorContado < 0) { mostrarToast("Informe o valor contado no caixa."); return; }
+      const observacoes = document.getElementById("caixa-obs-fechamento").value.trim();
+      if (!(await confirmarAcao("Fechar caixa", "Depois de fechado, o turno não pode ser reaberto. Confirma o fechamento?", "Fechar caixa"))) return;
+      const btn = document.getElementById("btn-confirmar-fechamento");
+      btn.disabled = true;
+      try {
+        const resultado = await store.fechamentos.fechar(caixaAberto.id, { valorContado, observacoes });
+        const dif = resultado.diferenca;
+        const msg = dif === 0 ? "Caixa fechado — bateu certinho!" : dif > 0 ? `Caixa fechado — sobrou ${formatBRL(dif)}.` : `Caixa fechado — faltou ${formatBRL(Math.abs(dif))}.`;
+        mostrarToast(msg);
+        await recarregar();
+      } catch (erro) {
+        mostrarToast(erro.message);
+        btn.disabled = false;
+      }
+    });
+  }
+
+  desenhar();
+}
+
+// ============================================================
 // PÁGINA: PAINEL
 // ============================================================
 let graficoVendasInstancia = null;
@@ -1010,14 +1241,14 @@ async function renderPainel(container) {
         <div class="metric-card"><div class="metric-icon" style="background:#FEF3C7"><i data-icon="cart" style="color:#CA8A04"></i></div>
           <div><p class="metric-label">PEDIDOS HOJE</p><p class="metric-value">${metricas.pedidosHoje}</p></div></div>
       </div>
-      <div style="margin-top:16px">${renderFormasPagamentoHTML(metricas.pagamentosHoje)}</div>
-      <div id="painel-pedidos-embutido"></div>
+     
+      <div id="painel-caixa-wrap"></div>
     `;
     renderIcons(container);
     const alertaEstoqueGerente = document.getElementById("alerta-estoque-baixo");
     if (alertaEstoqueGerente) alertaEstoqueGerente.addEventListener("click", () => { if (window.__irParaEstoque) window.__irParaEstoque(); });
 
-    renderPedidos(document.getElementById("painel-pedidos-embutido"));
+    renderCaixaGerente(document.getElementById("painel-caixa-wrap"));
     return;
   }
 
@@ -1135,12 +1366,15 @@ function imprimirComanda(pedido) {
   janela.onload = () => { janela.focus(); janela.print(); };
 }
 
-function renderPedidos(container) {
+function renderPedidos(container, opcoes = {}) {
+  const ocultarFiltroData = !!opcoes.ocultarFiltroData;
+  const ocultarCabecalho = !!opcoes.ocultarCabecalho;
+  const desde = opcoes.desde || null; // quando informado, só mostra pedidos a partir desse instante (início do turno)
   const usuario = Auth.obterUsuarioLogado();
   const eCozinha = usuario?.papel === "cozinha";
-  let filtroData = hojeChave();
+  let filtroData = ocultarFiltroData ? null : hojeChave();
 
-  container.innerHTML = `
+  container.innerHTML = ocultarCabecalho ? `<div id="tabela-pedidos-wrap"></div>` : `
     <div class="toolbar" style="justify-content:space-between; display: ${eCozinha ? 'none' : 'flex'}">
       <p class="page-subtitle" style="margin:0">Pedidos feitos pelo cliente no cardápio chegam aqui automaticamente.</p>
       <a href="cardapio.html" target="_blank" class="btn-secondary" style="text-decoration:none;display:inline-block">Abrir cardápio do cliente ↗</a>
@@ -1149,31 +1383,34 @@ function renderPedidos(container) {
       <div class="metric-card">
         <div class="metric-icon" style="background:#fdf3d9"><i data-icon="file"></i></div>
         <div>
-          <p class="metric-label">PEDIDOS NA DATA</p>
+          <p class="metric-label">${ocultarFiltroData ? "PEDIDOS" : "PEDIDOS NA DATA"}</p>
           <p class="metric-value" id="contador-pedidos-data">—</p>
         </div>
       </div>
+      ${ocultarFiltroData ? "" : `
       <div class="form-field" style="max-width:220px;margin:auto 0">
         <label for="filtro-data-pedidos">Filtrar por data</label>
         <input id="filtro-data-pedidos" type="date" value="${filtroData}" />
       </div>
       <div style="display:flex;align-items:flex-end">
         <button class="btn-secondary" id="btn-limpar-filtro-data">Ver todos os dias</button>
-      </div>
+      </div>`}
     </div>
     <div id="tabela-pedidos-wrap" style="margin-top:16px"></div>
   `;
   renderIcons(container);
 
-  document.getElementById("filtro-data-pedidos").addEventListener("change", (evento) => {
-    filtroData = evento.target.value || null;
-    desenharTabela();
-  });
-  document.getElementById("btn-limpar-filtro-data").addEventListener("click", () => {
-    filtroData = null;
-    document.getElementById("filtro-data-pedidos").value = "";
-    desenharTabela();
-  });
+  if (!ocultarFiltroData && !ocultarCabecalho) {
+    document.getElementById("filtro-data-pedidos").addEventListener("change", (evento) => {
+      filtroData = evento.target.value || null;
+      desenharTabela();
+    });
+    document.getElementById("btn-limpar-filtro-data").addEventListener("click", () => {
+      filtroData = null;
+      document.getElementById("filtro-data-pedidos").value = "";
+      desenharTabela();
+    });
+  }
 
   // NOVA LÓGICA DE GERENCIAMENTO DE STATUS (BLOQUEIA OPERAÇÕES PARA O ADMIN)
   function acoesPorStatus(p) {
@@ -1223,7 +1460,8 @@ function renderPedidos(container) {
   }
 
   async function desenharTabela() {
-    const todos = await store.pedidos.listar();
+    const todosBrutos = await store.pedidos.listar();
+    const todos = desde ? todosBrutos.filter((p) => paraDataUTC(p.criadoEm) >= paraDataUTC(desde)) : todosBrutos;
     const lista = filtroData
       ? todos.filter((p) => chaveDiaSP(paraDataUTC(p.criadoEm)) === filtroData)
       : todos;
@@ -1240,7 +1478,7 @@ function renderPedidos(container) {
     }
 
     if (!todos.length) {
-      wrap.innerHTML = emptyState("Nenhum pedido recebido ainda", "Assim que um cliente fizer um pedido pelo cardápio, ele aparece aqui.");
+      wrap.innerHTML = emptyState(desde ? "Nenhum pedido neste turno ainda" : "Nenhum pedido recebido ainda", "Assim que um cliente fizer um pedido pelo cardápio, ele aparece aqui.");
       return;
     }
     if (!lista.length) {
@@ -2010,7 +2248,7 @@ function renderUsuarios(container) {
       evento.target.disabled = true;
       try {
         await store.usuarios.adicionar({ nome, email, papel: document.getElementById("u-papel").value, ativo: document.getElementById("u-ativo").checked });
-        mostrarToast("Cadastrado com a senha padrão '123456'.");
+        mostrarToast("Usuário cadastrado! A senha de acesso foi enviada por e-mail.");
         formWrap.innerHTML = "";
         desenhar();
       } catch (erro) {
@@ -2081,8 +2319,14 @@ const PAGINAS = {
 let paginaAtivaId = "painel";
 
 async function atualizarBadgePendentes() {
-  if (!Auth.obterUsuarioLogado()) return; // evita chamadas à API antes do login (causava loop de reload)
-  const badge = document.getElementById("badge-pendentes");
+  const usuario = Auth.obterUsuarioLogado();
+  if (!usuario) return; // evita chamadas à API antes do login (causava loop de reload)
+
+  // Só o painel do gerente tem os pedidos embutidos — pra ele, a contagem
+  // vai pro Painel. Admin, atendente e cozinha veem um painel sem pedidos
+  // (ou não têm painel), então continuam vendo a contagem na aba Pedidos.
+  const temPainelComPedidos = usuario.papel === "gerente";
+  const badge = document.getElementById(temPainelComPedidos ? "badge-pendentes-painel" : "badge-pendentes-pedidos");
   if (!badge) return;
   const pedidos = await store.pedidos.listar();
   const pendentes = pedidos.filter((p) => p.status === "pendente").length;
@@ -2211,7 +2455,13 @@ document.addEventListener("DOMContentLoaded", () => {
         pedidoNovo = lista.slice().sort((a, b) => paraDataUTC(b.criadoEm) - paraDataUTC(a.criadoEm))[0] || null;
       } catch (erro) { /* segue sem detalhes do pedido */ }
     }
-    mostrarNotificacaoPedido(pedidoNovo);
+    // O som toca sempre, não importa a aba em que você está — pra nunca
+    // perder um pedido novo. Já o card visual de notificação só aparece
+    // na aba Painel, já que a aba Pedidos agora é só pra conferência.
+    tocarSomNovoPedido();
+    if (paginaAtivaId === "painel") {
+      mostrarNotificacaoPedido(pedidoNovo);
+    }
 
     if (paginaAtivaId === "pedidos") {
       renderPedidos(corpoEl);
@@ -2238,6 +2488,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   socket.on("configuracoes:atualizada", () => {
     if (paginaAtivaId === "configuracoes") renderConfiguracoes(corpoEl);
+  });
+  socket.on("caixa:aberto", () => {
+    if (paginaAtivaId === "painel") renderPainel(corpoEl);
+  });
+  socket.on("caixa:fechado", () => {
+    if (paginaAtivaId === "painel") renderPainel(corpoEl);
   });
 
   if (Auth.obterUsuarioLogado()) { inicializarApp(); }

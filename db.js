@@ -79,6 +79,30 @@ db.exec(`
     telefone TEXT DEFAULT '',
     email TEXT DEFAULT ''
   );
+
+  CREATE TABLE IF NOT EXISTS fechamentos_caixa (
+    id TEXT PRIMARY KEY,
+    gerenteAbriuId TEXT NOT NULL,
+    gerenteAbriuNome TEXT NOT NULL,
+    gerenteFechouId TEXT,
+    gerenteFechouNome TEXT,
+    status TEXT NOT NULL DEFAULT 'aberto' CHECK (status IN ('aberto','fechado')),
+    valorAbertura REAL NOT NULL DEFAULT 0,
+    observacoesAbertura TEXT,
+    abertoEm TEXT NOT NULL DEFAULT (datetime('now')),
+    fechadoEm TEXT,
+    totalPedidos INTEGER,
+    totalPix REAL,
+    totalCartao REAL,
+    totalDinheiro REAL,
+    totalGeral REAL,
+    valorContado REAL,
+    diferenca REAL,
+    observacoesFechamento TEXT
+  );
+
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_fechamento_unico_aberto
+    ON fechamentos_caixa (status) WHERE status = 'aberto';
 `);
 
 // Migração — bancos criados antes do papel "atendente" existir têm a coluna

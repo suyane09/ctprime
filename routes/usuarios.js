@@ -1,11 +1,22 @@
 const express = require("express");
-const { randomUUID } = require("crypto");
+const { randomUUID, randomInt } = require("crypto");
 const bcrypt = require("bcryptjs");
 const db = require("../db");
 const { autenticar, permitirPapeis } = require("../middleware/auth");
+const { enviarEmailBoasVindas } = require("../services/emailService");
 
 const router = express.Router();
 router.use(autenticar, permitirPapeis("admin"));
+
+// Gera uma senha aleatória legível (sem caracteres fáceis de confundir, tipo 0/O e 1/l).
+function gerarSenhaAleatoria(tamanho = 10) {
+  const caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  let senha = "";
+  for (let i = 0; i < tamanho; i++) {
+    senha += caracteres[randomInt(caracteres.length)];
+  }
+  return senha;
+}
 
 function paraSaida(u) {
   const { senha_hash, ...resto } = u;
@@ -27,13 +38,21 @@ router.post("/", (req, res) => {
   if (existente) return res.status(409).json({ erro: "Já existe um usuário com este e-mail." });
 
   const id = randomUUID();
-  const senhaHash = bcrypt.hashSync("123456", 10);
+  const senhaGerada = gerarSenhaAleatoria();
+  const senhaHash = bcrypt.hashSync(senhaGerada, 10);
   db.prepare(`
     INSERT INTO usuarios (id, nome, email, senha_hash, papel, ativo)
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(id, nome, emailNormalizado, senhaHash, papel, ativo === false ? 0 : 1);
 
-  res.status(201).json(paraSaida(db.prepare("SELECT * FROM usuarios WHERE id = ?").get(id)));
+  const usuarioCriado = paraSaida(db.prepare("SELECT * FROM usuarios WHERE id = ?").get(id));
+  res.status(201).json(usuarioCriado);
+
+  // Dispara o e-mail de boas-vindas depois de responder à requisição, pra não
+  // deixar o admin esperando o envio do e-mail terminar. Falha no envio não
+  // afeta o cadastro (já foi salvo no banco). A senha só existe em texto puro
+  // aqui, nesse momento — depois disso só existe o hash no banco.
+  enviarEmailBoasVindas({ nome, email: emailNormalizado, senha: senhaGerada });
 });
 
 router.patch("/:id", (req, res) => {

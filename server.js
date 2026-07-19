@@ -24,6 +24,7 @@ app.use("/api/pedidos", require("./routes/pedidos"));
 app.use("/api/usuarios", require("./routes/usuarios"));
 app.use("/api/relatorios", require("./routes/relatorios"));
 app.use("/api/configuracoes", require("./routes/configuracoes"));
+app.use("/api/fechamentos", require("./routes/fechamento"));
 registrarRotaUpload(app, autenticar); // troque "autenticar" pelo nome que você achou no Passo 4
 // Mesma lógica do DATA_DIR: em produção (Render), aponte UPLOADS_DIR pro
 // Persistent Disk. Sem a variável, usa a pasta "uploads" local de sempre.
